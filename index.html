@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="TheFinBen">
+  <meta name="keywords" content="NER">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta property="og:title" content="UniversalNER" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://universal-ner.github.io/" />
+	<meta property="og:image" content="" />
+  <title>TheFinBen</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="images/galaxy.png">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
+  <script type="module" src="https://gradio.s3-us-west-2.amazonaws.com/3.27.0/gradio.js"></script>
+</head>
+
+<style>
+  .expandable-card .card-text-container {
+    max-height: 200px;
+    overflow-y: hidden;
+    position: relative;
+  }
+
+  .expandable-card.expanded .card-text-container {
+    max-height: none;
+  }
+
+  .expand-btn {
+    position: relative;
+    display: none;
+    background-color: rgba(255, 255, 255, 0.8);
+    /* margin-top: -20px; */
+    /* justify-content: center; */
+    color: #510c75;
+    border-color: transparent;
+  }
+
+  .expand-btn:hover {
+    background-color: rgba(200, 200, 200, 0.8);
+    text-decoration: none;
+    border-color: transparent;
+    color: #510c75;
+  }
+
+  .expand-btn:focus {
+    outline: none;
+    text-decoration: none;
+  }
+
+  .expandable-card:not(.expanded) .card-text-container:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 90px;
+    background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 1));
+  }
+
+  .expandable-card:not(.expanded) .expand-btn {
+    margin-top: -40px;
+  }
+
+  .card-body {
+    padding-bottom: 5px;
+  }
+
+  .vertical-flex-layout {
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .figure-img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .adjustable-font-size {
+    font-size: calc(0.5rem + 2vw);
+  }
+
+  .chat-history {
+    flex-grow: 1;
+    overflow-y: auto;
+    /* overflow-x: hidden; */
+    padding: 5px;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 10px;
+  }
+
+  #gradio pre {
+    background-color: transparent;
+  }
+</style>
+
+<body>
+
+
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title"><img id="pixiu" width="20%" src="static/finai.png"></imgsrc></h1>
+            <h2 class="title is-2 publication-title">The FinBen</h2>
+            <h3 class="title is-3 publication-title">An Holistic Financial Benchmark for Large Language Models</h3>
+            <div class="is-size-5">
+              <span class="author-block">
+                <a style="font-weight:normal;">Qianqian Xie<sup>a</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Weiguang Han<sup>b</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Zhengyu Chen<sup>b</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Ruoyu Xiang<sup>a</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Xiao Zhang<sup>a</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Yueru He<sup>a</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Mengxi Xiao<sup>b</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Dong Li<sup>b</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Yongfu Dai<sup>g</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Duanyu Feng<sup>g</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Yijing Xu<sup>a</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Haoqiang Kang<sup>e</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Ziyan Kuang<sup>l</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Chenhan Yuan<sup>c</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Kailai Yang<sup>c</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Zheheng Luo<sup>c</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Tianlin Zhang<sup>c</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Zhiwei Liu<sup>c</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Guojun Xiong<sup>j</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Zhiyang Deng<sup>i</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Yuechen Jiang<sup>i</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Zhiyuan Yao<sup>i</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Haohang Li<sup>i</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Yangyang Yu<sup>i</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Gang Hu<sup>h</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Jiajia Huang<sup>k</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Xiao-Yang Liu<sup>e</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Alejandro Lopez-Lira<sup>d</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Benyou Wang<sup>f</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Yanzhao Lai<sup>m</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Hao Wang<sup>g</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Min Peng<sup>b*</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Sophia Ananiadou<sup>c</sup></a>,
+              </span>
+              <span class="author-block">
+                <a style="font-weight:normal;">Jimin Huang<sup>a</sup></a>,
+              </span>
+            </div>
+
+            <br>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block"><b style="font-weight:normal"></b><sup>a</sup>The Fin AI,</b></span>
+              <span class="author-block"><b style="font-weight:normal"></b><sup>b</sup>Wuhan University,</b></span>
+              <span class="author-block"><b style="font-weight:normal"></b><sup>c</sup>The University of Manchester,</b></span>
+              <span class="author-block"><b style="font-weight:normal"></b><sup>d</sup>University of Florida,</b></span>
+              <span class="author-block"><b style="font-weight:normal"></b><sup>e</sup>Columbia University,</b></span>
+              <span class="author-block"><b style="font-weight:normal"></b><sup>f</sup>The Chinese University of Hong Kong, Shenzhen,</b></span>
+              <span class="author-block"><b style="font-weight:normal"></b><sup>g</sup>Sichuan University,</b></span>
+              <span class="author-block"><b style="font-weight:normal"></b><sup>h</sup>Yunnan University,</b></span>
+              <span class="author-block"><b style="font-weight:normal"></b><sup>i</sup>Stevens Institute of Technology,</b></span>
+              <span class="author-block"><b style="font-weight:normal"></b><sup>j</sup>Stony Brook University,</b></span>
+              <span class="author-block"><b style="font-weight:normal"></b><sup>k</sup>Nanjin Audit University,</b></span>
+              <span class="author-block"><b style="font-weight:normal"></b><sup>l</sup>Jiangxi Normal University,</b></span>
+              <span class="author-block"><b style="font-weight:normal"></b><sup>m</sup>Southwest Jiaotong University,</b></span>
+            </div>
+            
+
+
+            <div class="column has-text-centered">
+              <div class="publication-links">
+                <span class="link-block">
+                  <a href="https://arxiv.org/abs/2402.12659" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                    </span>
+                    <span>arXiv</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://github.com/The-FinAI/PIXIU" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fab fa-github"></i>
+                    </span>
+                    <span>Code</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://huggingface.co/TheFinAI" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fas fa-database"></i>
+                    </span>
+                    <span>Dataset</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://huggingface.co/TheFinAI" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fas fa-share-square"></i>
+                    </span>
+                    <span>Model</span>
+                  </a>
+                </span>
+
+
+                
+
+                <!-- <span class="link-block">
+                <a href="#"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                    <i class="fab fa-youtube"></i>
+                  </span>
+                  <span>Video</span>
+                  </a>
+              </span> -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="hero teaser">
+    <div class="container is-max-desktop">
+      <div class="hero-body">
+        <h4 class="subtitle has-text-centered">
+          <!--
+          We propose a general recipe for <i>targeted</i> distilling where we train student models using mission-focused instruction tuning
+           for a broad application class such as open information extraction. We show that this can maximally replicate LLM’s capabilities
+           for the given application class, while preserving its generalizability across semantic types and domains.
+           Using NER as a case study, we successfully distill these capabilities from LLMs into a much smaller model UniversalNER
+           that can recognize diverse types of entities or concepts in text corpora from a wide range of domains.
+           UniversalNER surpasses existing instruction-tuned models at the same size (e.g., Alpaca, Vicuna) by a large margin, and shows substantially better performance to ChatGPT.
+          -->
+          <!--czy update-->
+          Welcome to the FinBen: Our Financial Language Understanding and Prediction Evaluation Benchmark. 
+          <br>FinBen serves as the evaluation suite for financial LLMs, with a focus on understanding and prediction tasks across various financial contexts.<br>
+          We're delighted to share that our paper, "The FinBen: An Holistic Financial Benchmark for Large Language Models", is now available at <a href="https://arxiv.org/abs/2402.12659">FinBen</a>.
+        </h4>
+      </div>
+    </div>
+  </section>
+  
+
+
+<section class="section">
+  <!-- Results. -->
+  <div class="columns is-centered has-text-centered">
+    <div class="column is-six-fifths">
+      <h2 class="title is-3"><img id="painting_icon" width="5%" src="https://cdn-icons-png.flaticon.com/512/3515/3515174.png"> FinBen 2.0: Financial Language Understanding and Prediction Evaluation Benchmark</h2>
+      <p>
+        In this section, we provide a detailed performance analysis of FinMA compared to other leading models, including ChatGPT, GPT-4, and BloombergGPT et al. 
+        For this analysis, we've chosen a range of tasks and metrics that span various aspects of financial Natural Language Processing and financial prediction. 
+        All model results of FinBen can be found on our <a href="https://huggingface.co/spaces/TheFinAI/FinBen">leaderboard</a>!
+        An overview of the data distribution is shown below.
+      </p>
+    </div>
+  </div>
+
+
+
+  <!-- </div> -->
+  <!--/ Results. -->    
+<div class="container is-max-desktop">
+
+
+  <!-- Grounedtext2img. -->
+  <div class="columns is-centered">
+    <div class="column is-full-width">
+      <h2 class="title is-4"><img id="painting_icon" width="4%" src="images/chart.png"> <span style="font-size: 100%;">Distribution of FinBen:</span></h2>
+       <div class="columns is-centered has-text-centered">
+      <div class="column is-six-fifths" style="display: flex; align-items: flex-start; justify-content: center;">  
+        <figure style="text-align: center;">
+          <img id="teaser" width="50%" src="static/burst.png">  
+          <figcaption>
+            Distribution of FinBen.
+          </figcaption>
+        </figure>
+      
+
+      </div>
+      </div>  
+
+    </div>
+  </div>
+
+
+
+  <!-- Grounedtext2img. -->
+  <div class="columns is-centered">
+    <div class="column is-full-width">
+      <h2 class="title is-4"> <img id="painting_icon" width="3%" src="images/alchemy.png"><span style="font-size: 100%;"> The tasks, datasets, data statistics, and evaluation metrics included in FinBen</span></h2>
+      <p>
+        Our benchmark framework evaluates financial LLMs through a hierarchy inspired by the CattellHorn-Carroll (CHC) theory, defining cognitive abilities in three Spectrums. 
+        Spectrum I includes foundational tasks like Quantification using classification tasks, Extraction covering information extraction tasks, and Numerical Understanding. 
+        Spectrum II advances to Generation (Crystallized Intelligence) covering generaltion task, and Forecasting (Fluid Intelligence) with prediction tasks, requiring deeper cognitive engagement. 
+        The pinnacle, Spectrum III, encompasses strategic decision-making in trading using the current state-of-art financial LLM agent with the stock trading task, showcasing General Intelligence. 
+        This structured approach allows for nuanced assessment of LLMs' financial analytical capabilities across varied cognitive demands.
+      </p>
+  <div class="column is-six-fifths" style="display: flex; align-items: flex-start; justify-content: center;">  
+    <table class="GeneratedTable" style="width: 60%;">
+      <thead>
+    <tr>
+        <th>Data</th>
+        <th>Task</th>
+        <th>Test</th>
+        <th>Evaluation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+        <td>FPB</td>
+        <td>sentiment analysis</td>
+        <td>970</td>
+        <td>F1,Accuracy</td>
+    </tr>
+    <tr>
+        <td>FiQA-SA</td>
+        <td>sentiment analysis</td>
+        <td>235</td>
+        <td>F1</td>
+    </tr>
+    <tr>
+        <td>TSA</td>
+        <td>sentiment analysis</td>
+        <td>561</td>
+        <td>F1,Accuracy</td>
+    </tr>
+    <tr>
+        <td>Headlines</td>
+        <td>news headline classification</td>
+        <td>2,283</td>
+        <td>AvgF1</td>
+    </tr>
+    <tr>
+        <td>FOMC</td>
+        <td>hawkish-dovish classification</td>
+        <td>496</td>
+        <td>F1,Accuracy</td>
+    </tr>
+    <tr>
+        <td>FinArg-ACC</td>
+        <td>argument unit classification</td>
+        <td>969</td>
+        <td>F1,Accuracy</td>
+    </tr>
+    <tr>
+        <td>FinArg-ARC</td>
+        <td>argument relation classification</td>
+        <td>496</td>
+        <td>F1,Accuracy</td>
+    </tr>
+    <tr>
+        <td>MultiFin</td>
+        <td>multi-class classification</td>
+        <td>690</td>
+        <td>F1,Accuracy</td>
+    </tr>
+    <tr>
+        <td>MA</td>
+        <td>deal completeness classification</td>
+        <td>500</td>
+        <td>accuracy,F1</td>
+    </tr>
+    <tr>
+        <td>MLESG</td>
+        <td>ESG Issue Identification</td>
+        <td>300</td>
+        <td>accuracy,F1</td>
+    </tr>
+    <tr>
+        <td>NER</td>
+        <td>named entity recognition</td>
+        <td>980</td>
+        <td>EntityF1</td>
+    </tr>
+    <tr>
+        <td>FiNER-ORD</td>
+        <td>named entity recognition</td>
+        <td>1080</td>
+        <td>EntityF1</td>
+    </tr>
+    <tr>
+        <td>FinRED</td>
+        <td>relation extraction</td>
+        <td>1,068</td>
+        <td>F1,EntityF1</td>
+    </tr>
+    <tr>
+        <td>SC</td>
+        <td>causal classification</td>
+        <td>8,630</td>
+        <td>F1,EntityF1</td>
+    </tr>
+    <tr>
+        <td>CD</td>
+        <td>causal detection</td>
+        <td>226</td>
+        <td>F1,EntityF1</td>
+    </tr>
+    <tr>
+        <td>FinQA</td>
+        <td>question answering</td>
+        <td>1,147</td>
+        <td>EMAccuracy</td>
+    </tr>
+    <tr>
+        <td>TATQA</td>
+        <td>question answering</td>
+        <td>1,668</td>
+        <td>F1,EMAccuracy</td>
+    </tr>
+    <tr>
+        <td>ConvFinQA</td>
+        <td>question answering</td>
+        <td>1,490</td>
+        <td>EMAccuracy</td>
+    </tr>
+    <tr>
+        <td>FNXL</td>
+        <td>numeric labeling</td>
+        <td>318</td>
+        <td>F1,EMAccuracy</td>
+    </tr>
+    <tr>
+        <td>FSRL</td>
+        <td>token classification</td>
+        <td>97</td>
+        <td>F1,EMAccuracy</td>
+    </tr>
+    <tr>
+        <td>ECTSum</td>
+        <td>text summarization</td>
+        <td>495</td>
+        <td>ROUGE,BERTScore,BARTScore</td>
+    </tr>
+    <tr>
+      <td>EDTSum</td>
+      <td>text summarization</td>
+      <td>2000</td>
+      <td>ROUGE,BERTScore,BARTScore</td>
+  </tr>
+  <tr>
+    <td>BigData22</td>
+    <td>stock movement prediction</td>
+    <td>1,470</td>
+    <td>Accuracy,MCC</td>
+</tr>
+<tr>
+  <td>ACL18</td>
+  <td>stock movement prediction</td>
+  <td>3,720</td>
+  <td>Accuracy,MCC</td>
+</tr>
+<tr>
+  <td>CIKM18</td>
+  <td>stock movement prediction</td>
+  <td>1,140</td>
+  <td>Accuracy,MCC</td>
+</tr>
+<tr>
+  <td>German</td>
+  <td>credit scoring</td>
+  <td>1000</td>
+  <td>F1,MCC</td>
+</tr>
+<tr>
+  <td>Australian</td>
+  <td>credit scoring</td>
+  <td>690</td>
+  <td>F1,MCC</td>
+</tr>
+<tr>
+  <td>LendingClub</td>
+  <td>credit scoring</td>
+  <td>2,690</td>
+  <td>F1,MCC</td>
+</tr>
+<tr>
+  <td>ccf</td>
+  <td>fraud detection</td>
+  <td>2,278</td>
+  <td>F1,MCC</td>
+</tr>
+<tr>
+  <td>ccfraud</td>
+  <td>fraud detection</td>
+  <td>2,097</td>
+  <td>F1,MCC</td>
+</tr>
+<tr>
+  <td>polish</td>
+  <td>financial distress identification</td>
+  <td>1,736</td>
+  <td>F1,MCC</td>
+</tr>
+<tr>
+  <td>taiwan</td>
+  <td>financial distress identification</td>
+  <td>1,364</td>
+  <td>F1,MCC</td>
+</tr>
+<tr>
+  <td>PortoSeguro</td>
+  <td>claim analysis</td>
+  <td>2,381</td>
+  <td>F1,MCC</td>
+</tr>
+<tr>
+  <td>travelinsurance</td>
+  <td>claim analysis</td>
+  <td>3,800</td>
+  <td>F1,MCC</td>
+</tr>
+<tr>
+  <td>fintrade</td>
+  <td>stock trading</td>
+  <td>3,384</td>
+  <td> CR,SR,DV,AV,MD</td>
+</tr>
+
+    
+    
+    
+    
+</tbody>
+</table>
+    </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- czy update -->
+<section class="section">
+  <!-- Results. -->
+  <div class="columns is-centered has-text-centered">
+    <div class="column is-six-fifths">
+      <h2 class="title is-4"> <img id="painting_icon" width="3%" src="images/command-line.png"><span style="font-size: 100%;"> Results</span></h2>
+    </div>
+  </div>
+  <!-- </div> -->
+  <!--/ Results. -->    
+<div class="container is-max-desktop">
+
+  <div class="columns is-centered">
+    <div class="column is-full-width">
+      <div class="content has-text-justified">
+        <p>
+          The performance of 12 representative LLMs on all datasets in the FinBen:
+        </p>
+
+        <div class="columns is-centered">
+          <div class="column is-full-width">
+             <div class="columns is-centered has-text-centered">
+            <div class="column is-six-fifths" style="display: flex; align-items: flex-start; justify-content: center;">  
+              <figure style="text-align: center;">
+                <img id="teaser" width="150%" src="static/English.png">  
+                <figcaption>
+
+                </figcaption>
+              </figure>
+            </div>
+            </div>  
+          </div>
+        </div>
+
+<!-- CSS Code: Place this code in the document's head (between the 'head' tags) -->
+<style>
+  table.GeneratedTable {
+    width: 100%;
+    background-color: #ffffff;
+    border-collapse: collapse;
+    border-width: 2px;
+    border-color: #c1c4c5;
+    border-style: solid;
+    color: #000000;
+  }
+  
+  table.GeneratedTable td, table.GeneratedTable th {
+    border-width: 2px;
+    border-color: #9b9d9e;
+    border-style: solid;
+    padding: 5px;
+  }
+  
+  table.GeneratedTable thead {
+    background-color: #6691ee;
+  }
+  </style>
+  
+ 
+
+  <section class="section" id="BibTeX">
+    <div class="container is-max-desktop content">
+      <h2 class="title">BibTeX</h2>
+      <pre><code>
+        @misc{xie2024finben,
+          title={The FinBen: An Holistic Financial Benchmark for Large Language Models}, 
+          author={Qianqian Xie and Weiguang Han and Zhengyu Chen and Ruoyu Xiang and Xiao Zhang and Yueru He and Mengxi Xiao and Dong Li and Yongfu Dai and Duanyu Feng and Yijing Xu and Haoqiang Kang and Ziyan Kuang and Chenhan Yuan and Kailai Yang and Zheheng Luo and Tianlin Zhang and Zhiwei Liu and Guojun Xiong and Zhiyang Deng and Yuechen Jiang and Zhiyuan Yao and Haohang Li and Yangyang Yu and Gang Hu and Jiajia Huang and Xiao-Yang Liu and Alejandro Lopez-Lira and Benyou Wang and Yanzhao Lai and Hao Wang and Min Peng and Sophia Ananiadou and Jimin Huang},
+          year={2024},
+          eprint={2402.12659},
+          archivePrefix={arXiv},
+          primaryClass={cs.CL}
+        }
+  </code></pre>
+    </div>
+  </section>
+  
+  <section class="section" id="Acknowledgement">
+    <div class="container is-max-desktop content">
+      <h2 class="title">Acknowledgement</h2>
+      <p>
+        This website is adapted from <a
+        href="https://github.com/nerfies/nerfies.github.io">Nerfies</a> and <a href="https://llava-vl.github.io/">LLaVA</a>, licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+        Commons Attribution-ShareAlike 4.0 International License</a>.  We thank the LLaMA team for giving us access to their models.
+      </p>
+
+      <p>
+<b>Usage and License Notices</b>: The data, code and checkpoint is intended and licensed for research use only. They are also restricted to uses that follow the license agreement of LLaMA, ChatGPT, and the original dataset used in the benchmark. The dataset is CC BY NC 4.0 (allowing only non-commercial use) and models trained using the dataset should not be used outside of research purposes.
+</p>
+    </div>
+  </section>
+
+  <script>
+    // Handle message showing
+    function createChatRow(sender, text, imageSrc) {
+      var article = document.createElement("article");
+      article.className = "media"
+
+      var figure = document.createElement("figure");
+      figure.className = "media-left";
+
+      var span = document.createElement("span");
+      span.className = "icon is-large";
+
+      var icon = document.createElement("i");
+      icon.className = "fas fas fa-2x" + (sender === "User" ? " fa-user " : sender === "UniversalNER" ? " fa-robot" : "");
+
+      var media = document.createElement("div");
+      media.className = "media-content";
+
+      var content = document.createElement("div");
+      content.className = "content";
+
+      var para = document.createElement("p");
+
+      // wrap text in pre tag to preserve whitespace and line breaks
+      var pre_text = document.createElement("pre");
+      pre_text.style = "background-color: white; font-size: 18px; font-family: Arial; padding: 0; margin: 0; white-space: pre-wrap; word-wrap: break-word;";
+      // var paraText = document.createTextNode(text);
+      // pre_text.appendChild(paraText);
+      pre_text.innerHTML = text;
+
+      var strong = document.createElement("strong");
+      strong.innerHTML = sender;
+      var br = document.createElement("br");
+
+      para.appendChild(strong);
+      para.appendChild(br);
+      para.appendChild(pre_text);
+
+      // Add image if imageSrc is provided
+      if (imageSrc) {
+        var img = document.createElement("img");
+        img.src = imageSrc;
+        img.style = "max-width: 100%; max-height: 300px;"; // Adjust the style as needed
+        para.appendChild(img);
+      }
+
+      content.appendChild(para);
+      media.appendChild(content);
+      span.appendChild(icon);
+      figure.appendChild(span);
+      if (sender !== "Description") {
+        article.appendChild(figure);
+      };
+      article.appendChild(media);
+      return article;
+    }
+
+    function addMessageToChatHistory(sender, message, imageSrc) {
+      const chatHistory = document.querySelector('.chat-history');
+      const chatRow = createChatRow(sender, message, imageSrc);
+      chatHistory.appendChild(chatRow);
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    function clearChatHistory() {
+      const chatHistory = document.querySelector('.chat-history');
+      chatHistory.innerHTML = "";
+    }
+
+    // 
+    let codeString = `Text:<br><code>from transformers import GPT2Tokenizer, GPT2LMHeadModel
+
+tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+model = GPT2LMHeadModel.from_pretrained('gpt2')
+
+input_text = "This is a simple program"
+input_ids = tokenizer.encode(input_text, return_tensors='pt')
+output = model.generate(input_ids, max_new_tokens=50)
+generated_text = tokenizer.decode(output[0], skip_special_tokens=True)</code>`;
+
+    let absString = `Text:<br>Relation extraction (RE), which has relied on structurally annotated corpora for model training, has been particularly challenging in low-resource scenarios and domains. Recent literature has tackled low-resource RE by self-supervised learning, where the solution involves pretraining the entity pair embedding by RE-based objective and finetuning on labeled data by classification-based objective. However, a critical challenge to this approach is the gap in objectives, which prevents the RE model from fully utilizing the knowledge in pretrained representations. In this paper, we aim at bridging the gap and propose to pretrain and finetune the RE model using consistent objectives of contrastive learning. Since in this kind of representation learning paradigm, one relation may easily form multiple clusters in the representation space, we further propose a multi-center contrastive loss that allows one relation to form multiple clusters to better align with pretraining. Experiments on two document-level RE datasets, BioRED and Re-DocRED, demonstrate the effectiveness of our method. Particularly, when using 1% end-task training data, our method outperforms PLM-based RE classifier by 10.5% and 6.1% on the two datasets, respectively.`;
+
+    let noteString = `Text:<br>Patient Name: John Doe
+Age: 45
+Gender: Male
+Date of Examination: August 3, 2023
+
+Chief Complaint:
+The patient presents with a persistent cough and shortness of breath for the past two weeks.
+
+History of Present Illness:
+John Doe, a 45-year-old male, reports a progressive onset of cough, which started as a mild irritation but has worsened over the last two weeks. He also complains of occasional chest tightness and difficulty breathing, especially during physical exertion. There is no history of fever, chills, or recent upper respiratory tract infections.
+
+Past Medical History:
+
+Hypertension - Diagnosed 5 years ago, controlled with medication.
+Allergic Rhinitis - Seasonal allergies, managed with antihistamines.
+Obesity - BMI 32, struggling with weight management.`;
+
+    const conversations = [
+      {
+        "turns": [
+          ["User", noteString],
+          ["UniversalNER", "I've read this text."],
+          ["User", "What describes symptom in the text?​"],
+          ["UniversalNER",
+          '["cough", "shortness of breath", "chest tightness", "difficulty breathing", "fever", "chills"]'],
+          ["User", "What describes treatment in the text?​"],
+          ["UniversalNER",
+          '["medication", "antihistamines"]'],
+          ["User", "What describes measurement in the text?​"],
+          ["UniversalNER",'["BMI"]'],
+          ["User", "What describes time duration in the text?"],
+          ["UniversalNER", '["two weeks", "5 years ago"]'],
+          ["User", "What describes medical condition in the text?"],
+          ["UniversalNER", '["Hypertension", "Allergic Rhinitis", "Obesity"]']
+        ]
+      },
+      {
+        "turns": [
+          ["User", absString],
+          ["UniversalNER", "I've read this text."],
+          ["User", "What describes task in the text?​"],
+          ["UniversalNER",
+          '["Relation extraction", "low-resource RE", "document-level RE"]'],
+          ["User", "What describes dataset in the text?​"],
+          ["UniversalNER",
+          '["BioRED", "Re-DocRED"]'],
+          ["User", "What describes model in the text?​"],
+          ["UniversalNER",'["RE model", "PLM-based RE classifier"]'],
+          ["User", "What describes method in the text?"],
+          ["UniversalNER", '["self-supervised learning", "pretraining", "finetuning", "contrastive learning", "multi-center contrastive loss", "end-task training data"]'],
+          ["User", "What describes objective in the text?"],
+          ["UniversalNER", '["classification-based objective", "contrastive learning", "multi-center contrastive loss"]']
+        ]
+      },
+      {
+        "turns": [
+          ["User", codeString],
+          ["UniversalNER", "I've read this text."],
+          ["User", "What describes library in the text?​"],
+          ["UniversalNER",
+          '["transformers"]'],
+          ["User", "What describes local variable in the text?​"],
+          ["UniversalNER",
+          '["input_text", "input_ids", "output", "generated_text"]'],
+          ["User", "What describes global variable in the text?​"],
+          ["UniversalNER",'[]'],
+          ["User", "What describes method in the text?"],
+          ["UniversalNER", '["encode", "generate", "decode"]'],
+          ["User", "What describes class in the text?"],
+          ["UniversalNER", '["GPT2Tokenizer", "GPT2LMHeadModel"]']
+
+        ]
+      },
+    ];
+
+    // The current image index
+    let currentIndex = 0;
+
+    // The function to update the displayed chat history
+    function update_dialog_demo() {
+      // Clear the chat history
+      clearChatHistory();
+
+      for (let i = 0; i < conversations[currentIndex].turns.length; i++) {
+        if (conversations[currentIndex].turns[i].length == 2) {
+          addMessageToChatHistory(conversations[currentIndex].turns[i][0], conversations[currentIndex].turns[i][1]);
+        }
+        else {
+          addMessageToChatHistory(conversations[currentIndex].turns[i][0], conversations[currentIndex].turns[i][1], conversations[currentIndex].turns[i][2]);
+        }
+      }
+
+      // scroll to the top of the chat history
+      document.querySelector('.chat-history').scrollTop = 0;
+    }
+
+    // Initialize the displayed image
+    update_dialog_demo();
+
+    // Event listeners for the buttons
+    document.getElementById('prev-question').addEventListener('click', () => {
+      currentIndex = (currentIndex - 1 + conversations.length) % conversations.length;
+      update_dialog_demo();
+    });
+
+    document.getElementById('next-question').addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % conversations.length;
+      update_dialog_demo();
+    });
+
+
+  </script>
+
+</body>
+
+</html>
